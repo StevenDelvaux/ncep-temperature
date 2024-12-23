@@ -21,6 +21,7 @@ import dropbox
 putOnDropbox = True
 auto = True
 monthLengths = [31,28,31,30,31,30,31,31,30,31,30,31]
+datafolder = 'data/'
 
 class RegionCode: 		# Region codes used in CryoSat auxiliary data
 	cab = 1
@@ -210,9 +211,9 @@ def printRegionalTemperature(data, ax, col, ymin, ymax, name, north=True):
 	
 def createPlots():
 	print("inside create plots")
-	csvFileName = 'data/ncep-arctic-ocean-temperature-925-mb-1979-to-2023.csv'
-	uploadToDropbox([csvFileName])
-	with open(csvFileName, 'r') as f:
+	csvFileName = 'ncep-arctic-ocean-temperature-925-mb-1979-to-2023.csv'
+	uploadToDropbox([csvFileName], datafolder)
+	with open(datafolder + csvFileName, 'r') as f:
 		data = f.readlines()
 	fig, axs = plt.subplots(figsize=(8, 5))
 	label = "NCEP reanalysis 925 mb temperature over Arctic Ocean (°C) 1979-2024"
@@ -220,9 +221,9 @@ def createPlots():
 	filename = 'ncep-reanalysis-temperature-925-mb-over-arctic-ocean.png'
 	fig.savefig(filename)
 
-	csvFileName = 'data/ncep-arctic-ocean-surface-temperature-1979-to-2023.csv'
-	uploadToDropbox([csvFileName])
-	with open(csvFileName, 'r') as f:
+	csvFileName = 'ncep-arctic-ocean-surface-temperature-1979-to-2023.csv'
+	uploadToDropbox([csvFileName], datafolder)
+	with open(datafolder + csvFileName, 'r') as f:
 		data = f.readlines()
 	
 	fig, axs = plt.subplots(figsize=(8, 5))	
@@ -782,7 +783,7 @@ def reset():
 	allmonth = []
 	allday = []
 		
-def uploadToDropbox(filenames):
+def uploadToDropbox(filenames, folder = ''):
 	if not putOnDropbox:
 		return
 	dropbox_access_token = config('DROPBOX_ACCESS_TOKEN')
@@ -795,7 +796,7 @@ def uploadToDropbox(filenames):
 	for computer_path in filenames:
 		print("[UPLOADING] {}".format(computer_path))
 		dropbox_path= "/" + computer_path
-		client.files_upload(open(computer_path, "rb").read(), dropbox_path, mode=dropbox.files.WriteMode.overwrite)
+		client.files_upload(open(folder + computer_path, "rb").read(), dropbox_path, mode=dropbox.files.WriteMode.overwrite)
 		print("[UPLOADED] {}".format(computer_path))
 		
 def get_credentials(SCOPES):
@@ -1018,52 +1019,52 @@ if(auto):
 	hemisphereshort = "" if north else "south-"
 	
 	format = ','.join(['%i'] + ['%7.3f']*(len(arctictempsforyear925[0])-1))
-	doAppendToCsvFile('data/ncep-' + hemisphere + '-ocean-temperature-925-mb-1979-to-2023', arctictempsforyear925, format)
+	doAppendToCsvFile(datafolder + 'ncep-' + hemisphere + '-ocean-temperature-925-mb-1979-to-2023', arctictempsforyear925, format)
 	#updateLastRowOfCsvFile('data/ncep-' + hemisphere + '-ocean-temperature-925-mb-1979-to-2023', arctictempsforyear925, format)
 	
-	filename925mb = "data/ncep-" + hemisphereshort + "925mb-regional" 		
-	appendToRegionalCsv(filename925mb, north)
+	filename925mb = "ncep-" + hemisphereshort + "925mb-regional" 		
+	appendToRegionalCsv(datafolder + filename925mb, north)
 
-	uploadToDropbox([filename925mb + ".csv"])
+	uploadToDropbox([filename925mb + ".csv"], datafolder)
 	
 	reset()
 	
 	arctictempsforyear = []
 	arctictempsforyear.append(loadYear(2024))
-	doAppendToCsvFile('data/ncep-' + hemisphere + '-ocean-surface-temperature-1979-to-2023', arctictempsforyear, format)
+	doAppendToCsvFile(datafolder + 'ncep-' + hemisphere + '-ocean-surface-temperature-1979-to-2023', arctictempsforyear, format)
 	#updateLastRowOfCsvFile('data/ncep-' + hemisphere + '-ocean-surface-temperature-1979-to-2023', arctictempsforyear, format)
 	
-	filenamesurface = "data/ncep-" + hemisphereshort + "surface-regional" 
-	appendToRegionalCsv(filenamesurface, north)
-	uploadToDropbox([filenamesurface + ".csv"])	
+	filenamesurface = "ncep-" + hemisphereshort + "surface-regional" 
+	appendToRegionalCsv(datafolder + filenamesurface, north)
+	uploadToDropbox([filenamesurface + ".csv"], datafolder)	
 	
 	time.sleep(5)
 	
 	createPlots()
 	
-	plotRegionalGraphs925mb(filename925mb + ".csv")
-	plotRegionalGraphsSurface(filenamesurface + ".csv")
+	plotRegionalGraphs925mb(datafolder + filename925mb + ".csv")
+	plotRegionalGraphsSurface(datafolder + filenamesurface + ".csv")
 	
 	reset()
 	
 	north = False
 	
-	filename925mb = "data/ncep-south-925mb-regional"
+	filename925mb = "ncep-south-925mb-regional"
 	loadYear925(2024)
-	appendToRegionalCsv(filename925mb, north)
-	uploadToDropbox([filename925mb + ".csv"])
+	appendToRegionalCsv(datafolder + filename925mb, north)
+	uploadToDropbox([filename925mb + ".csv"], datafolder)
 	
 	reset()
 	
-	filenamesurface = "data/ncep-south-surface-regional"
+	filenamesurface = "ncep-south-surface-regional"
 	loadYear(2024)
-	appendToRegionalCsv(filenamesurface, north)
-	uploadToDropbox([filenamesurface + ".csv"])
+	appendToRegionalCsv(datafolder + filenamesurface, north)
+	uploadToDropbox([filenamesurface + ".csv"], datafolder)
 	
 	time.sleep(5)
 	
-	plotRegionalGraphs925mbSouth(filename925mb + ".csv")
-	plotRegionalGraphsSurfaceSouth(filenamesurface + ".csv")
+	plotRegionalGraphs925mbSouth(datafolder + filename925mb + ".csv")
+	plotRegionalGraphsSurfaceSouth(datafolder + filenamesurface + ".csv")
 
 	time.sleep(3)
 	uploadToGoogleDrive()
