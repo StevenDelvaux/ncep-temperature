@@ -40,15 +40,15 @@ class RegionCode: 		# Region codes used in CryoSat auxiliary data
 	okhotsk = 14
 	
 def downloadLatestFiles():
-	filename = 'https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/pressure/air.2024.nc'
-	localfilename = 'air.2024.nc'
+	filename = 'https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/pressure/air.2025.nc'
+	localfilename = 'air.2025.nc'
 	file_object = requests.get(filename) 
 	with open(localfilename, 'wb') as local_file:
 		local_file.write(file_object.content)
 	print('downloaded', filename)
 	
-	filename = 'https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/surface/air.sig995.2024.nc'
-	localfilename = 'air.sig995.2024.nc'
+	filename = 'https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/surface/air.sig995.2025.nc'
+	localfilename = 'air.sig995.2025.nc'
 	file_object = requests.get(filename) 
 	with open(localfilename, 'wb') as local_file:
 		local_file.write(file_object.content)
@@ -121,8 +121,9 @@ def plotTemperature(data, ax, ymin, ymax, name):
 	plotLine(ax, lines, dates, 43, '_2022', (0.71,0.71,0.71));
 	ax.plot(dates, baseline, label='1980-2009 avg', linestyle='dashed', color=(0,0,0));
 	ax.plot(dates, tens, label='2010-2022 avg',  color=(0,0,0));
-	plotLine(ax, lines, dates, 44, '2023', (1.0,0.75,0));
-	plotLine(ax, lines, dates, 45, '2024', (1.0,0.0,0.0), linewidth=2);
+	plotLine(ax, lines, dates, 44, '_2023', (0.70,0.70,0.70));
+	plotLine(ax, lines, dates, 45, '2024', (1.0,0.75,0.0));
+	plotLine(ax, lines, dates, 46, '2025', (1.0,0.0,0.0), linewidth=2);
 	print('b')
 	
 	ax.set_ylabel("Temperature (°C)")
@@ -141,8 +142,9 @@ def printRegionalTemperature(data, ax, col, ymin, ymax, name, north=True):
 	print('inside printRegionalTemperature', name, ymin, ymax)
 	regional = data[1:,col]
 	regional = np.array([i.lstrip() for i in regional]).astype(float)
-	padded = np.pad(regional, (0, 365*46 - regional.shape[0]), 'constant', constant_values=(np.nan,))
-	matrix = padded.reshape((46,365))
+	years = 2025 - 1979 + 1
+	padded = np.pad(regional, (0, 365*years - regional.shape[0]), 'constant', constant_values=(np.nan,))
+	matrix = padded.reshape((years,365))
 	dates = np.arange(1,366)
 	eighties = np.sum(matrix[1:10,:],axis=0)/10
 	nineties = np.sum(matrix[11:20,:],axis=0)/10
@@ -195,8 +197,9 @@ def printRegionalTemperature(data, ax, col, ymin, ymax, name, north=True):
 	ax.plot(dates, matrix[43,:], label='_2022', color=(0.71,0.71,0.71));
 	ax.plot(dates, baseline, label='1980-2009 avg', linestyle='dashed', color=(0,0,0));
 	ax.plot(dates, tens, label='2010-2022 avg',  color=(0,0,0));
-	ax.plot(dates, matrix[44,:], label='2023', color=(1,0.75,0));	
-	ax.plot(dates, matrix[45,:], label='2024', color=(1.0,0,0), linewidth=2);
+	ax.plot(dates, matrix[44,:], label='_2023', color=(0.70,0.70,0.70));	
+	ax.plot(dates, matrix[45,:], label='2024', color=(1.0,0.75,0));
+	ax.plot(dates, matrix[46,:], label='2025', color=(1.0,0,0), linewidth=2);
 	ax.set_ylabel("Temperature (°C)")
 	ax.set_title(name)
 	ax.legend(ncol=1, loc=(8 if north else 3), prop={'size': 8})
@@ -216,7 +219,7 @@ def createPlots():
 	with open(datafolder + csvFileName, 'r') as f:
 		data = f.readlines()
 	fig, axs = plt.subplots(figsize=(8, 5))
-	label = "NCEP reanalysis 925 mb temperature over Arctic Ocean (°C) 1979-2024"
+	label = "NCEP reanalysis 925 mb temperature over Arctic Ocean (°C) 1979-2025"
 	plotTemperature(data, axs, -30, 8.2, label)
 	filename = 'ncep-reanalysis-temperature-925-mb-over-arctic-ocean.png'
 	fig.savefig(filename)
@@ -227,7 +230,7 @@ def createPlots():
 		data = f.readlines()
 	
 	fig, axs = plt.subplots(figsize=(8, 5))	
-	plotTemperature(data, axs, -35, 5, "NCEP reanalysis surface temperature over Arctic Ocean (°C) 1979-2024")
+	plotTemperature(data, axs, -35, 5, "NCEP reanalysis surface temperature over Arctic Ocean (°C) 1979-2025")
 	filename = 'ncep-reanalysis-surface-temperature-over-arctic-ocean.png'
 	fig.savefig(filename)
 
@@ -239,57 +242,61 @@ def saveRegionalPlot(col, ymin, ymax, data, name, filename, north = True):
 	
 def plotRegionalGraphs925mb(filename):
 	data = np.loadtxt(filename, delimiter=",", dtype=str)
-
-	saveRegionalPlot(4, -40, 20, data, "Beaufort Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-beaufort-temperature.png")
-	saveRegionalPlot(5, -40, 20, data, "Chukchi Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-chukchi-temperature.png")
-	saveRegionalPlot(6, -35, 20, data, "East Siberian Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-ess-temperature.png")
-	saveRegionalPlot(7, -35, 20, data, "Laptev Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-laptev-temperature.png")
-	saveRegionalPlot(8, -35, 20, data, "Kara Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-kara-temperature.png")
-	saveRegionalPlot(9, -25, 20, data, "Barents Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-barents-temperature.png")
-	saveRegionalPlot(10, -20, 15, data, "Greenland Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-greenland-temperature.png")
-	saveRegionalPlot(11, -35, 10, data, "Central Arctic Basin NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-cab-temperature.png")
-	saveRegionalPlot(12, -40, 15, data, "Canadian Arctic Archipelago NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-caa-temperature.png")
-	saveRegionalPlot(13, -25, 15, data, "Baffin Bay NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-baffin-temperature.png")
-	saveRegionalPlot(14, -35, 20, data, "Hudson Bay NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-hudson-temperature.png")
-	saveRegionalPlot(3, -20, 15, data, "Bering Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-bering-temperature.png")
-	saveRegionalPlot(2, -25, 20, data, "Sea of Okhotsk NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-okhotsk-temperature.png")
+	titleSuffix = " NCEP reanalysis 925mb temperature 1979-2025"
+	
+	saveRegionalPlot(4, -40, 20, data, "Beaufort Sea" + titleSuffix, "ncep-925mb-beaufort-temperature.png")
+	saveRegionalPlot(5, -40, 20, data, "Chukchi Sea" + titleSuffix, "ncep-925mb-chukchi-temperature.png")
+	saveRegionalPlot(6, -35, 20, data, "East Siberian Sea" + titleSuffix, "ncep-925mb-ess-temperature.png")
+	saveRegionalPlot(7, -35, 20, data, "Laptev Sea" + titleSuffix, "ncep-925mb-laptev-temperature.png")
+	saveRegionalPlot(8, -35, 20, data, "Kara Sea" + titleSuffix, "ncep-925mb-kara-temperature.png")
+	saveRegionalPlot(9, -25, 20, data, "Barents Sea" + titleSuffix, "ncep-925mb-barents-temperature.png")
+	saveRegionalPlot(10, -20, 15, data, "Greenland Sea" + titleSuffix, "ncep-925mb-greenland-temperature.png")
+	saveRegionalPlot(11, -35, 10, data, "Central Arctic Basin" + titleSuffix, "ncep-925mb-cab-temperature.png")
+	saveRegionalPlot(12, -40, 15, data, "Canadian Arctic Archipelago" + titleSuffix, "ncep-925mb-caa-temperature.png")
+	saveRegionalPlot(13, -25, 15, data, "Baffin Bay" + titleSuffix, "ncep-925mb-baffin-temperature.png")
+	saveRegionalPlot(14, -35, 20, data, "Hudson Bay" + titleSuffix, "ncep-925mb-hudson-temperature.png")
+	saveRegionalPlot(3, -20, 15, data, "Bering Sea" + titleSuffix, "ncep-925mb-bering-temperature.png")
+	saveRegionalPlot(2, -25, 20, data, "Sea of Okhotsk" + titleSuffix, "ncep-925mb-okhotsk-temperature.png")
 
 def plotRegionalGraphs925mbSouth(filename):
 	data = np.loadtxt(filename, delimiter=",", dtype=str)
+	titleSuffix = " NCEP reanalysis 925mb temperature 1979-2025"
 
-	saveRegionalPlot(2, -30, 2, data, "Weddell Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-weddell-temperature.png", False)
-	saveRegionalPlot(3, -40, 3, data, "Bellingshausen-Amundsen Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-bellam-temperature.png", False)
-	saveRegionalPlot(4, -35, 2, data, "Ross Sea NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-ross-temperature.png", False)
-	saveRegionalPlot(5, -35, 5, data, "West Pacific southern ocean sector NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-pacific-temperature.png", False)
-	saveRegionalPlot(6, -30, 2, data, "Indian southern ocean sector NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-indian-temperature.png", False)
-	saveRegionalPlot(7, -30, 2, data, "Southern ocean NCEP reanalysis 925mb temperature 1979-2024", "ncep-925mb-southern-temperature.png", False)
+	saveRegionalPlot(2, -30, 2, data, "Weddell Sea" + titleSuffix, "ncep-925mb-weddell-temperature.png", False)
+	saveRegionalPlot(3, -40, 3, data, "Bellingshausen-Amundsen Sea" + titleSuffix, "ncep-925mb-bellam-temperature.png", False)
+	saveRegionalPlot(4, -35, 2, data, "Ross Sea" + titleSuffix, "ncep-925mb-ross-temperature.png", False)
+	saveRegionalPlot(5, -35, 5, data, "West Pacific southern ocean sector" + titleSuffix, "ncep-925mb-pacific-temperature.png", False)
+	saveRegionalPlot(6, -30, 2, data, "Indian southern ocean sector" + titleSuffix, "ncep-925mb-indian-temperature.png", False)
+	saveRegionalPlot(7, -30, 2, data, "Southern ocean" + titleSuffix, "ncep-925mb-southern-temperature.png", False)
 	
 def plotRegionalGraphsSurface(filename):
 	data = np.loadtxt(filename, delimiter=",", dtype=str)
+	titleSuffix = " NCEP reanalysis surface air temperature 1979-2025"
 
-	saveRegionalPlot(4, -40, 12, data, "Beaufort Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-beaufort-temperature.png")
-	saveRegionalPlot(5, -40, 12, data, "Chukchi Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-chukchi-temperature.png")
-	saveRegionalPlot(6, -40, 12, data, "East Siberian Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-ess-temperature.png")
-	saveRegionalPlot(7, -40, 14, data, "Laptev Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-laptev-temperature.png")
-	saveRegionalPlot(8, -40, 12, data, "Kara Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-kara-temperature.png")
-	saveRegionalPlot(9, -25, 12, data, "Barents Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-barents-temperature.png")
-	saveRegionalPlot(10, -15, 10, data, "Greenland Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-greenland-temperature.png")
-	saveRegionalPlot(11, -40, 5, data, "Central Arctic Basin NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-cab-temperature.png")
-	saveRegionalPlot(12, -40, 13, data, "Canadian Arctic Archipelago NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-caa-temperature.png")
-	saveRegionalPlot(13, -25, 12, data, "Baffin Bay NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-baffin-temperature.png")
-	saveRegionalPlot(14, -40, 15, data, "Hudson Bay NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-hudson-temperature.png")
-	saveRegionalPlot(3, -15, 13, data, "Bering Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-bering-temperature.png")
-	saveRegionalPlot(2, -25, 18, data, "Sea of Okhotsk NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-okhotsk-temperature.png")
+	saveRegionalPlot(4, -40, 12, data, "Beaufort Sea" + titleSuffix, "ncep-surface-beaufort-temperature.png")
+	saveRegionalPlot(5, -40, 12, data, "Chukchi Sea" + titleSuffix, "ncep-surface-chukchi-temperature.png")
+	saveRegionalPlot(6, -40, 12, data, "East Siberian Sea" + titleSuffix, "ncep-surface-ess-temperature.png")
+	saveRegionalPlot(7, -40, 14, data, "Laptev Sea" + titleSuffix, "ncep-surface-laptev-temperature.png")
+	saveRegionalPlot(8, -40, 12, data, "Kara Sea" + titleSuffix, "ncep-surface-kara-temperature.png")
+	saveRegionalPlot(9, -25, 12, data, "Barents Sea" + titleSuffix, "ncep-surface-barents-temperature.png")
+	saveRegionalPlot(10, -15, 10, data, "Greenland Sea" + titleSuffix, "ncep-surface-greenland-temperature.png")
+	saveRegionalPlot(11, -40, 5, data, "Central Arctic Basin" + titleSuffix, "ncep-surface-cab-temperature.png")
+	saveRegionalPlot(12, -40, 13, data, "Canadian Arctic Archipelago" + titleSuffix, "ncep-surface-caa-temperature.png")
+	saveRegionalPlot(13, -25, 12, data, "Baffin Bay" + titleSuffix, "ncep-surface-baffin-temperature.png")
+	saveRegionalPlot(14, -40, 15, data, "Hudson Bay" + titleSuffix, "ncep-surface-hudson-temperature.png")
+	saveRegionalPlot(3, -15, 13, data, "Bering Sea" + titleSuffix, "ncep-surface-bering-temperature.png")
+	saveRegionalPlot(2, -25, 18, data, "Sea of Okhotsk" + titleSuffix, "ncep-surface-okhotsk-temperature.png")
 
 def plotRegionalGraphsSurfaceSouth(filename):
 	data = np.loadtxt(filename, delimiter=",", dtype=str)
+	titleSuffix = " NCEP reanalysis surface air temperature 1979-2025"
 
-	saveRegionalPlot(2, -40, 2, data, "Weddell Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-weddell-temperature.png", False)
-	saveRegionalPlot(3, -45, 5, data, "Bellingshausen-Amundsen Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-bellam-temperature.png", False)
-	saveRegionalPlot(4, -40, 2, data, "Ross Sea NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-ross-temperature.png", False)
-	saveRegionalPlot(5, -40, 5, data, "West Pacific southern ocean sector NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-pacific-temperature.png", False)
-	saveRegionalPlot(6, -40, 2, data, "Indian southern ocean sector NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-indian-temperature.png", False)
-	saveRegionalPlot(7, -30, 2, data, "Southern ocean NCEP reanalysis surface air temperature 1979-2024", "ncep-surface-southern-temperature.png", False)
+	saveRegionalPlot(2, -40, 2, data, "Weddell Sea" + titleSuffix, "ncep-surface-weddell-temperature.png", False)
+	saveRegionalPlot(3, -45, 5, data, "Bellingshausen-Amundsen Sea" + titleSuffix, "ncep-surface-bellam-temperature.png", False)
+	saveRegionalPlot(4, -40, 2, data, "Ross Sea" + titleSuffix, "ncep-surface-ross-temperature.png", False)
+	saveRegionalPlot(5, -40, 5, data, "West Pacific southern ocean sector" + titleSuffix, "ncep-surface-pacific-temperature.png", False)
+	saveRegionalPlot(6, -40, 2, data, "Indian southern ocean sector" + titleSuffix, "ncep-surface-indian-temperature.png", False)
+	saveRegionalPlot(7, -30, 2, data, "Southern ocean" + titleSuffix, "ncep-surface-southern-temperature.png", False)
 
 def appendToRegionalCsv(filename, north = True):
 	
@@ -896,7 +903,7 @@ def appendToCsvFile(filenameshort, data, format):
 	filename = filenameshort + '.csv'
 	
 	lastSavedYear,lastSavedDay = getLastSavedDay(filename)
-	rowstoadd = int((365*lastyear + lastday) - (365*lastSavedYear + lastSavedDay))
+	rowstoadd = int((366 if lastSavedYear % 4 == 0 else 365)*(lastyear - lastSavedYear) + lastday - lastSavedDay)
 	print('last saved day', lastSavedYear, lastSavedDay, ' and ', rowstoadd)
 
 	if rowstoadd <= 0:
@@ -1013,7 +1020,7 @@ if(auto):
 	downloadLatestFiles()
 
 	arctictempsforyear925 = [] 
-	arctictempsforyear925.append(loadYear925(2024))
+	arctictempsforyear925.append(loadYear925(2025))
 	
 	hemisphere = 'arctic' if north else 'antarctic'
 	hemisphereshort = "" if north else "south-"
@@ -1030,7 +1037,7 @@ if(auto):
 	reset()
 	
 	arctictempsforyear = []
-	arctictempsforyear.append(loadYear(2024))
+	arctictempsforyear.append(loadYear(2025))
 	doAppendToCsvFile(datafolder + 'ncep-' + hemisphere + '-ocean-surface-temperature-1979-to-2023', arctictempsforyear, format)
 	#updateLastRowOfCsvFile('data/ncep-' + hemisphere + '-ocean-surface-temperature-1979-to-2023', arctictempsforyear, format)
 	
@@ -1050,14 +1057,14 @@ if(auto):
 	north = False
 	
 	filename925mb = "ncep-south-925mb-regional"
-	loadYear925(2024)
+	loadYear925(2025)
 	appendToRegionalCsv(datafolder + filename925mb, north)
 	uploadToDropbox([filename925mb + ".csv"], datafolder)
 	
 	reset()
 	
 	filenamesurface = "ncep-south-surface-regional"
-	loadYear(2024)
+	loadYear(2025)
 	appendToRegionalCsv(datafolder + filenamesurface, north)
 	uploadToDropbox([filenamesurface + ".csv"], datafolder)
 	
