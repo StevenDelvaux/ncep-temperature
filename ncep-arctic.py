@@ -72,8 +72,8 @@ def plotTemperature(data, ax, ymin, ymax, name):
 	print(matrix.shape)	
 			
 	dates = np.arange(1,366)
-	baseline = np.sum(matrix[1:30],axis=0)/30
-	tens = np.sum(matrix[31:43],axis=0)/12
+	baseline = np.sum(matrix[1:31],axis=0)/30
+	tens = np.sum(matrix[31:45],axis=0)/14
 
 	plotLine(ax, lines, dates, 0, '_1979', (0.99,0.99,0.99));
 	plotLine(ax, lines, dates, 1, '_1980', (0.99,0.99,0.99));
@@ -120,7 +120,7 @@ def plotTemperature(data, ax, ymin, ymax, name):
 	plotLine(ax, lines, dates, 42, '_2021', (0.71,0.71,0.71));
 	plotLine(ax, lines, dates, 43, '_2022', (0.71,0.71,0.71));
 	ax.plot(dates, baseline, label='1980-2009 avg', linestyle='dashed', color=(0,0,0));
-	ax.plot(dates, tens, label='2010-2022 avg',  color=(0,0,0));
+	ax.plot(dates, tens, label='2010-2023 avg',  color=(0,0,0));
 	plotLine(ax, lines, dates, 44, '_2023', (0.70,0.70,0.70));
 	plotLine(ax, lines, dates, 45, '2024', (1.0,0.75,0.0));
 	plotLine(ax, lines, dates, 46, '2025', (1.0,0.0,0.0), linewidth=2);
@@ -146,11 +146,11 @@ def printRegionalTemperature(data, ax, col, ymin, ymax, name, north=True):
 	padded = np.pad(regional, (0, 365*years - regional.shape[0]), 'constant', constant_values=(np.nan,))
 	matrix = padded.reshape((years,365))
 	dates = np.arange(1,366)
-	eighties = np.sum(matrix[1:10,:],axis=0)/10
-	nineties = np.sum(matrix[11:20,:],axis=0)/10
-	noughties = np.sum(matrix[21:30,:],axis=0)/10
-	baseline = np.sum(matrix[1:30,:],axis=0)/30
-	tens = np.sum(matrix[31:43,:],axis=0)/12	
+	eighties = np.sum(matrix[1:11,:],axis=0)/10
+	nineties = np.sum(matrix[11:21,:],axis=0)/10
+	noughties = np.sum(matrix[21:31,:],axis=0)/10
+	baseline = np.sum(matrix[1:31,:],axis=0)/30
+	tens = np.sum(matrix[31:45,:],axis=0)/14	
 	ax.plot(dates, matrix[0,:], label='_1979', color=(0.99,0.99,0.99));
 	ax.plot(dates, matrix[1,:], label='_1980', color=(0.99,0.99,0.99));
 	ax.plot(dates, matrix[2,:], label='_1981', color=(0.98,0.98,0.98));
@@ -196,7 +196,7 @@ def printRegionalTemperature(data, ax, col, ymin, ymax, name, north=True):
 	ax.plot(dates, matrix[42,:], label='_2021', color=(0.71,0.71,0.71));
 	ax.plot(dates, matrix[43,:], label='_2022', color=(0.71,0.71,0.71));
 	ax.plot(dates, baseline, label='1980-2009 avg', linestyle='dashed', color=(0,0,0));
-	ax.plot(dates, tens, label='2010-2022 avg',  color=(0,0,0));
+	ax.plot(dates, tens, label='2010-2023 avg',  color=(0,0,0));
 	ax.plot(dates, matrix[44,:], label='_2023', color=(0.70,0.70,0.70));	
 	ax.plot(dates, matrix[45,:], label='2024', color=(1.0,0.75,0));
 	ax.plot(dates, matrix[46,:], label='2025', color=(1.0,0,0), linewidth=2);
